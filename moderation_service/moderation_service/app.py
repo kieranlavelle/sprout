@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from starlette.responses import JSONResponse
 
-from moderation_service.services.moderate_sentences import has_foul_language
-from moderation_service.schemas.sentence import Sentence
+from moderation_service.core.services.moderate_sentences import has_foul_language
+from moderation_service.core.schemas.sentence import Sentence
 
 app = FastAPI()
 

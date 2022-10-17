@@ -1,11 +1,11 @@
+import re
 from functools import lru_cache
 
 from moderation_service.config import settings
 
-import nltk
-
-nltk.download("punkt")  # this step would usually be done inside a Dockerfile
-from nltk import word_tokenize
+# in the real world we would likely use something like spacy
+# or nltk to tokenize our sentences and remove punct.
+splitting_regex = re.compile("([\w][\w]*'?\w?)")
 
 
 @lru_cache
@@ -23,5 +23,5 @@ def has_foul_language(sentence: str) -> bool:
         bool: True if the sentence is safe, False otherwise.
     """
 
-    words = word_tokenize(sentence)
+    words = splitting_regex.findall(sentence)
     return any(word in get_foul_words() for word in words)

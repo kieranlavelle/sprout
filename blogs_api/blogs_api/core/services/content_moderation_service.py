@@ -4,8 +4,8 @@ from itertools import chain
 
 import httpx
 
-from sprout.core.exceptions import APIException
-from sprout.config import settings
+from blogs_api.core.exceptions import APIException
+from blogs_api.config import settings
 
 
 def _split_paragraphs(paragraph: str) -> list[str]:

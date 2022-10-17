@@ -1,0 +1,25 @@
+version: "3.9" # optional since v1.27.0
+services:
+  moderation_service:
+    build: ./moderation_service
+    ports:
+      - "5001:8000"
+  blogs_api:
+    build: ./blogs_api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODERATION_API_ADDRESS=http://moderation_service:8000
+      - DYNAMODB_ADDRESS=http://dynamodb-local:8000
+      - AWS_ACCESS_KEY_ID=access_key
+      - AWS_SECRET_ACCESS_KEY=secret_key
+    depends_on:
+      - "dynamodb-local"
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    ports:
+      - "8001:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal

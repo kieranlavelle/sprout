@@ -4,8 +4,8 @@ import logging
 import boto3
 import botocore
 
-from sprout.config import settings
-from sprout.core.exceptions import FailedToSaveBlogPost
+from blogs_api.config import settings
+from blogs_api.core.exceptions import FailedToSaveBlogPost
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,14 +22,18 @@ def save_blog_post(title: str, paragraphs: list[str], has_foul_language: bool) -
         FailedToSaveBlogPost: If the blog post could not be saved.
     """
 
-    dynamodb = boto3.resource("dynamodb")
+    dynamodb = boto3.resource(
+        "dynamodb",
+        region_name=settings.AWS_REGION,
+        endpoint_url=settings.DYNAMODB_ADDRESS,
+    )
     table = dynamodb.Table(settings.BLOG_TABLE_NAME)
 
     try:
         table.put_item(
             Item={
-                "hk": title,
-                "sk": datetime.now().isoformat(),
+                "title": title,
+                "date_created": datetime.now().isoformat(),
                 "paragraphs": paragraphs,
                 "hasFoulLanguage": has_foul_language,
             },

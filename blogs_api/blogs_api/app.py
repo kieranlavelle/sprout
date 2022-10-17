@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from sprout.api import posts
+from blogs_api.api import posts
 
 app = FastAPI()
 app.include_router(posts.router)

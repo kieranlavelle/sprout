@@ -4,10 +4,10 @@ import logging
 from fastapi import APIRouter, HTTPException
 from starlette.responses import JSONResponse
 
-from sprout.core.schemas.blog_posts import BlogPost
-from sprout.core.services.content_moderation_service import moderate_content
-from sprout.core.exceptions import APIException
-from sprout.core.persistence.blog_posts import save_blog_post
+from blogs_api.core.schemas.blog_posts import BlogPost
+from blogs_api.core.services.content_moderation_service import moderate_content
+from blogs_api.core.exceptions import APIException, FailedToSaveBlogPost
+from blogs_api.core.persistence.blog_posts import save_blog_post
 
 router = APIRouter(prefix="/posts")
 LOGGER = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def create_billing_rate_endpoint(blog_post: BlogPost):
 
         return JSONResponse(content=blog_post.dict(), status_code=HTTPStatus.CREATED)
 
-    except APIException as e:
+    except (APIException, FailedToSaveBlogPost) as e:
         LOGGER.error(e)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Internal Server Error"

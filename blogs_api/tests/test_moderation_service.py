@@ -5,7 +5,7 @@ is mocked."""
 import httpx
 import pytest
 
-from sprout.core.services.content_moderation_service import (
+from blogs_api.core.services.content_moderation_service import (
     _create_sentences,
     moderate_content,
 )
