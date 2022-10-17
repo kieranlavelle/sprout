@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "blogs_api"
+version = "0.1.0"
+description = ""
+authors = ["Kieran Lavelle <kmplavelle@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.85.1"
+uvicorn = "^0.18.3"
+boto3 = "^1.24.91"
+pydantic = "^1.10.2"
+httpx = "^0.23.0"
+nltk = "^3.7"
+
+[tool.poetry.dev-dependencies]
+pytest = ">=5.2"
+black = "^22.10.0"
+moto = "^4.0.7"
+pytest-httpx = "^0.21.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -8,9 +8,12 @@
             "name": "Python: Webserver Dev Mode",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/start_dev.py",
+            "program": "${workspaceFolder}/start_webservers.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {
+                "CSV_FOUL_WORDS": "crap,rubbish,java,javascript"
+            }
         }
     ]
 }
