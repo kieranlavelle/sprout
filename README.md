@@ -56,12 +56,15 @@ It's also worth highlighting the table design.
 
 In the code base, the first table pattern is used. This has been done to aid with readability of the code. I've provided a more typical real world example below it to indicate what a production table might look like. The improved example has a couple of features that the first one does not have. I've highlighted these below. The real-world table design is an example of a pattern in DynamoDB where you use a single table for your entire application, and is typically the recommended way to design dynamo tables.
 1. As it's typical to store multiple entity types in a single DynamoDB table, the name of our hash and sort key attributes should be generic. In this case they're `hk` & `sk`.
-2. By having a fixed hash_key value for each entity type that enables us to get write queires that only fetch a single entity type from the database.
+2. By having a fixed hash_key value for each entity type we're able to write queires that only fetch a single entity type from the database.
 3. Using a ULID as our sort-key attribute ensures the items are sorted in the database.
-4. We can have additional attributes & global secondary indexes to enable certain query patterns.
+4. We can have additional attributes & global secondary indexes to enable other query patterns that are not directly supported by the hash or sort key.
 
 
 #### Tokenisation
+For tokenising the strings into word's and sentences I've used a niave approach. The best / most appropriate approach would depend on how downstream model had been trained. It'd likely be best to some sort of customised text cleaning using one of several libraries for nlp such as `spaCy` or `nltk`.
+
 #### Process the blog post after a while and then mark it to go live
-#### Table design for dynamoDB
-#### A real-world architechture.
+In a real world system it might be best to split the process of adding blog posts into two distinc stages. The approach below has the advantage of providing fast response times to the user making the blog post, whilst still enabling the system to check all posts.
+1. The post is sent to the API, which puts the `post` on a queue for processing.
+2. A worker read's `posts` off of the queue, and checks their content to see if it's safe or not. This worker then inserts the post into the database and set's the attribute `has_foul_language` against the item in the database.
