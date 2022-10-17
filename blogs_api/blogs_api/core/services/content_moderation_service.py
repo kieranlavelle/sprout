@@ -38,7 +38,7 @@ def _create_sentences(paragraphs: list[str]) -> list[str]:
     return chain.from_iterable(map(_split_paragraphs, paragraphs))
 
 
-def moderate_content(paragraphs: list[str]) -> bool:
+def has_foul_language(paragraphs: list[str]) -> bool:
     """This function is used to moderate the content of a blog post.
 
     The paragraphs are split into sentences. Each sentence is then moderated
@@ -49,12 +49,11 @@ def moderate_content(paragraphs: list[str]) -> bool:
         paragraphs (list[str]): The list of paragraphs to be moderated.
 
     Returns:
-        bool: True if the content is safe, False otherwise.
+        bool: True if the content is foul, False otherwise.
     """
 
     moderated_sentences = map(moderate_sentence, _create_sentences(paragraphs))
-    # must be !all as the moderation service returns True if the sentence is safe
-    return not all(moderated_sentences)
+    return any(moderated_sentences)
 
 
 def moderate_sentence(sentence: str) -> bool:

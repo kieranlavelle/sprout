@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from starlette.responses import JSONResponse
 
 from blogs_api.core.schemas.blog_posts import BlogPost, BlogPostResponse
-from blogs_api.core.services.content_moderation_service import moderate_content
+from blogs_api.core.services.content_moderation_service import has_foul_language
 from blogs_api.core.exceptions import APIException, FailedToSaveBlogPost
 from blogs_api.core.persistence.blog_posts import save_blog_post
 
@@ -17,14 +17,19 @@ LOGGER = logging.getLogger(__name__)
 def create_billing_rate_endpoint(blog_post: BlogPost):
 
     try:
-        content_is_safe = moderate_content(blog_post.paragraphs)
+        content_has_foul_language = has_foul_language(blog_post.paragraphs)
         save_blog_post(
             title=blog_post.title,
             paragraphs=blog_post.paragraphs,
-            has_foul_language=(not content_is_safe),
+            has_foul_language=content_has_foul_language,
         )
 
-        return JSONResponse(content=blog_post.dict(), status_code=HTTPStatus.CREATED)
+        return JSONResponse(
+            content=BlogPostResponse(
+                **blog_post.dict(), has_foul_language=content_has_foul_language
+            ),
+            status_code=HTTPStatus.CREATED,
+        )
 
     except FailedToSaveBlogPost as e:
         LOGGER.error(e)

@@ -7,7 +7,7 @@ import pytest
 
 from blogs_api.core.services.content_moderation_service import (
     _create_sentences,
-    moderate_content,
+    has_foul_language,
 )
 
 
@@ -19,20 +19,22 @@ def test_create_sentences(paragraphs: list[str], expected_sentences: list[str]) 
         pytest.fail("Sentences are not the same")
 
 
-@pytest.mark.parametrize("has_foul_language,expected", [(True, False), (False, True)])
+@pytest.mark.parametrize(
+    "content_has_foul_language,expected", [(True, True), (False, False)]
+)
 def test_moderate_content(
-    paragraphs: list[str], httpx_mock, has_foul_language, expected
+    paragraphs: list[str], httpx_mock, content_has_foul_language, expected
 ) -> None:
 
     # add a mocked response for httpx for the moderation service
     def has_foul_language_response(request: httpx.Request):
         return httpx.Response(
             status_code=200,
-            json={"hasFoulLanguage": has_foul_language},
+            json={"hasFoulLanguage": content_has_foul_language},
         )
 
     httpx_mock.add_callback(has_foul_language_response)
 
-    result = moderate_content(paragraphs)
+    result = has_foul_language(paragraphs)
     if result != expected:
         pytest.fail("Content was incorrectly marked.")
