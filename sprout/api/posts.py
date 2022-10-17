@@ -1,28 +1,33 @@
+from http import HTTPStatus
 import logging
 
-from fastapi import APIRouter, Response, HTTPException
+from fastapi import APIRouter, HTTPException
+from starlette.responses import JSONResponse
 
 from sprout.core.schemas.blog_posts import BlogPost
 from sprout.core.services.content_moderation_service import moderate_content
 from sprout.core.exceptions import APIException
+from sprout.core.persistence.blog_posts import save_blog_post
 
 router = APIRouter(prefix="/posts")
 LOGGER = logging.getLogger(__name__)
 
 
 @router.post("/")
-def create_billing_rate_endpoint(blog_post: BlogPost, response: Response):
+def create_billing_rate_endpoint(blog_post: BlogPost):
 
     try:
         content_is_safe = moderate_content(blog_post.paragraphs)
-        if content_is_safe:
-            # persist to the database
-            pass
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail="Content is not safe",
-            )
+        save_blog_post(
+            title=blog_post.title,
+            paragraphs=blog_post.paragraphs,
+            has_foul_language=(not content_is_safe),
+        )
+
+        return JSONResponse(content=blog_post.dict(), status_code=HTTPStatus.CREATED)
+
     except APIException as e:
         LOGGER.error(e)
-        raise HTTPException(status_code=500, detail="Internal Server Error") from e
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+        ) from e
