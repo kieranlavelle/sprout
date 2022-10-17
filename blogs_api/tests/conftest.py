@@ -1,6 +1,9 @@
 import boto3
 import pytest
 from moto import mock_dynamodb
+from fastapi.testclient import TestClient
+
+from blogs_api.app import app
 
 
 @pytest.fixture(autouse=True)
@@ -42,3 +45,8 @@ def expected_sentences() -> list[str]:
         "It contains two more sentences",
         "Third paraphraph here",
     ]
+
+
+@pytest.fixture
+def test_client() -> TestClient:
+    return TestClient(app)
