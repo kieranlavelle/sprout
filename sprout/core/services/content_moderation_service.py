@@ -20,28 +20,41 @@ def _split_paragraphs(paragraph: str) -> list[str]:
         list[str]: The list of sentences.
     """
 
-    return paragraph.split(".")
+    return [s.strip() for s in paragraph.split(".") if s]
 
 
-def moderate_content(paragraphs: list[str]) -> list[str]:
+def _create_sentences(paragraphs: list[str]) -> list[str]:
+    """This function is used to split paragraphs into sentences.
+
+    Sentences are split by the `.` character.
+
+    Args:
+        paragraphs (list[str]): The list of paragraphs to be split.
+
+    Returns:
+        list[str]: The list of sentences.
+    """
+
+    return chain.from_iterable(map(_split_paragraphs, paragraphs))
+
+
+def moderate_content(paragraphs: list[str]) -> bool:
     """This function is used to moderate the content of a blog post.
 
-    The paragraphs are split into strings using a splitting function to
-    form sentences. Each sentence is then moderated and the result of the function is
-    the result of all(sentences...) where sentences is a list of booleans
-    returned by the moderation service.
+    The paragraphs are split into sentences. Each sentence is then moderated
+    and the result of the function is the result of all(sentences...) where
+    sentences is a list of booleans returned by the moderation service.
 
     Args:
         paragraphs (list[str]): The list of paragraphs to be moderated.
 
     Returns:
-        list[str]: The list of paragraphs that are safe.
+        bool: True if the content is safe, False otherwise.
     """
 
-    all_sentences = (_split_paragraphs(p) for p in paragraphs)
-    all_sentences = chain.from_iterable(all_sentences)
-    moderated_sentences = map(moderate_sentence, all_sentences)
-    return all(moderated_sentences)
+    moderated_sentences = map(moderate_sentence, _create_sentences(paragraphs))
+    # must be !all as the moderation service returns True if the sentence is safe
+    return not all(moderated_sentences)
 
 
 def moderate_sentence(sentence: str) -> bool:
