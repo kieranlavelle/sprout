@@ -32,7 +32,34 @@ For the database, I went with a local version of DynamoDB running inside a docke
 1. It's fast to develop with.
 1. It's easy to model the data in when your use cases are know. As they were in this case.
 
-It's also worth highlighting the table design. In this case the table has a compound primary key where the title of the blog post is the hash-key and the date_created of the blog post is the sort key. In a real world application, we'd probably want to have a generic hash-key value of something like `#BLOG_POST` & a ULID sort-key (A UUID that is UTF sortable) for the blog post id. We'd likely also want several global secondary indexes to support additional query patterns on our blog items in the database, such as `blog_posts_by_user` & `blog_posts_by_date`. We'd design the table in this way in order to allow us to store all of the attributes for the API in a single table, as is often recommended for DynamoDB.
+It's also worth highlighting the table design. 
+```json
+# current table design
+# primary key = (title, date_created)
+{
+    "title": "kierans blog post",
+    "date_created": "2022-10-17T19:33:24.877456",
+    "paragraphs": [...],
+    "has_foul_language": False
+}
+
+# real world table design
+# primary key = (hk, sk)
+{
+    "hk": "#BLOG_POST",
+    "sk": "01GFKQ30926MMQ7HNQSDZSCYXH",
+    "paragraphs": [....],
+    "date_created": "2022-10-17T19:33:24.877456",
+    "created_by": "kieran"
+}
+```
+
+In the code base, the first table pattern is used. This has been done to aid with readability of the code. I've provided a more typical real world example below it to indicate what a production table might look like. The improved example has a couple of features that the first one does not have. I've highlighted these below. The real-world table design is an example of a pattern in DynamoDB where you use a single table for your entire application, and is typically the recommended way to design dynamo tables.
+1. As it's typical to store multiple entity types in a single DynamoDB table, the name of our hash and sort key attributes should be generic. In this case they're `hk` & `sk`.
+2. By having a fixed hash_key value for each entity type that enables us to get write queires that only fetch a single entity type from the database.
+3. Using a ULID as our sort-key attribute ensures the items are sorted in the database.
+4. We can have additional attributes & global secondary indexes to enable certain query patterns.
+
 
 #### Tokenisation
 #### Process the blog post after a while and then mark it to go live
