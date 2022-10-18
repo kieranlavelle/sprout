@@ -4,21 +4,25 @@ from moto import mock_dynamodb
 from fastapi.testclient import TestClient
 
 from blogs_api.app import app
+from blogs_api.config import settings
 
 
 @pytest.fixture(autouse=True)
-def create_table():
+def create_table(monkeypatch):
+
+    monkeypatch.setenv("DYNAMODB_ADDRESS", "http://localhost:8000")
+
     with mock_dynamodb():
         client = boto3.resource("dynamodb")
         table = client.create_table(
-            TableName="posts",
+            TableName=settings.BLOG_TABLE_NAME,
             BillingMode="PAY_PER_REQUEST",
             KeySchema=[
-                {"AttributeName": "post_id", "KeyType": "HASH"},
+                {"AttributeName": "title", "KeyType": "HASH"},
                 {"AttributeName": "date_created", "KeyType": "RANGE"},
             ],
             AttributeDefinitions=[
-                {"AttributeName": "post_id", "AttributeType": "S"},
+                {"AttributeName": "title", "AttributeType": "S"},
                 {"AttributeName": "date_created", "AttributeType": "S"},
             ],
         )

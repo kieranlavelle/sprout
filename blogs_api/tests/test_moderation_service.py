@@ -19,10 +19,11 @@ def test_create_sentences(paragraphs: list[str], expected_sentences: list[str]) 
         pytest.fail("Sentences are not the same")
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "content_has_foul_language,expected", [(True, True), (False, False)]
 )
-def test_moderate_content(
+async def test_moderate_content(
     paragraphs: list[str], httpx_mock, content_has_foul_language, expected
 ) -> None:
 
@@ -35,6 +36,6 @@ def test_moderate_content(
 
     httpx_mock.add_callback(has_foul_language_response)
 
-    result = has_foul_language(paragraphs)
+    result = await has_foul_language(paragraphs)
     if result != expected:
         pytest.fail("Content was incorrectly marked.")

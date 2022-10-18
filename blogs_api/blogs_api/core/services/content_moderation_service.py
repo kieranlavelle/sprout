@@ -4,7 +4,7 @@ from itertools import chain
 
 import httpx
 
-from blogs_api.core.exceptions import APIException
+from blogs_api.core.exceptions import ModerationServiceException
 from blogs_api.config import settings
 
 
@@ -38,7 +38,7 @@ def _create_sentences(paragraphs: list[str]) -> list[str]:
     return chain.from_iterable(map(_split_paragraphs, paragraphs))
 
 
-def has_foul_language(paragraphs: list[str]) -> bool:
+async def has_foul_language(paragraphs: list[str]) -> bool:
     """This function is used to moderate the content of a blog post.
 
     The paragraphs are split into sentences. Each sentence is then moderated
@@ -52,11 +52,11 @@ def has_foul_language(paragraphs: list[str]) -> bool:
         bool: True if the content is foul, False otherwise.
     """
 
-    moderated_sentences = map(moderate_sentence, _create_sentences(paragraphs))
-    return any(moderated_sentences)
+    has_foul_content = await moderate_sentences(_create_sentences(paragraphs))
+    return has_foul_content
 
 
-def moderate_sentence(sentence: str) -> bool:
+async def moderate_sentences(sentences: list[str]) -> bool:
     """This function is used to make calls to the moderation service.
 
     It transforms the response from the API into a boolean value.
@@ -68,18 +68,27 @@ def moderate_sentence(sentence: str) -> bool:
         bool: True if the sentence is safe, False otherwise.
     """
 
-    response = httpx.post(
-        f"{settings.MODERATION_API_ADDRESS}/sentences",
-        json={"fragment": sentence},
-    )
-
     try:
-        if response.status_code == 200:
-            json_response = response.json()
-            return json_response["hasFoulLanguage"]
-        else:
-            raise APIException(
-                f"Non 200 response from moderation service. Status Code: {response.status_code}"
-            )
+        async with httpx.AsyncClient() as client:
+            for sentence in sentences:
+                response = await client.post(
+                    settings.MODERATION_API_ADDRESS, json={"sentence": sentence}
+                )
+
+                response.raise_for_status()
+
+                # parse and process the body of the response
+                json_response = response.json()
+                if json_response["hasFoulLanguage"]:
+                    return True
+
+    except httpx.HTTPError as e:
+        raise ModerationServiceException(
+            "Bad response from the moderation service."
+        ) from e
     except KeyError as e:
-        raise ValueError("The moderation service returned an invalid response.") from e
+        raise ModerationServiceException(
+            "Badly formatted body from the moderation service."
+        ) from e
+
+    return False

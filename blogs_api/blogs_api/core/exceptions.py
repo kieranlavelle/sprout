@@ -1,4 +1,4 @@
-class APIException(Exception):
+class ModerationServiceException(Exception):
     """This exception is raised when the moderation service returns an error."""
 
     pass
