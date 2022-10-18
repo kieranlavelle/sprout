@@ -25,7 +25,10 @@ cd moderation_service
 poetry install
 poetry run pytests
 ```
- 
+
+## Foul words
+There are a couple of places where foul word's are configured depending on how you're running the application. In the case of unit tests the foul words environment variable `CSV_FOUL_WORDS` is set in `conftest.py`. The foul words are `"java", "php", "crap"`. When running the application using docker, the environment variable `CSV_FOUL_WORDS` is set in the container; `ENV CSV_FOUL_WORDS=java,php,html,crap`.
+
 ## Database Of choice
 For the database, I went with a local version of DynamoDB running inside a docker container. For the unit testing, I've used the package `moto` to mock the database calls. The main reason's I chose dynamo are outlined below.
 1. High scalability, as the application scales the database performance should remain constant.

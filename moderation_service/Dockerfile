@@ -21,7 +21,7 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi
 
-ENV CSV_FOUL_WORDS=java,php,html,crap,
+ENV CSV_FOUL_WORDS=java,php,html,crap
 
 # Run your app
 COPY . /app

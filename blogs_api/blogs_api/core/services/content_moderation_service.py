@@ -72,7 +72,8 @@ async def moderate_sentences(sentences: list[str]) -> bool:
         async with httpx.AsyncClient() as client:
             for sentence in sentences:
                 response = await client.post(
-                    settings.MODERATION_API_ADDRESS, json={"sentence": sentence}
+                    f"{settings.MODERATION_API_ADDRESS}/sentences",
+                    json={"fragment": sentence},
                 )
 
                 response.raise_for_status()
