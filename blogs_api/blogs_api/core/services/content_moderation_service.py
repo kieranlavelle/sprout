@@ -1,11 +1,14 @@
 """This module is used to wrap the content moderation API."""
 
+import logging
 from itertools import chain
 
 import httpx
 
 from blogs_api.core.exceptions import ModerationServiceException
 from blogs_api.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def _split_paragraphs(paragraph: str) -> list[str]:
@@ -71,9 +74,12 @@ async def moderate_sentences(sentences: list[str]) -> bool:
     try:
         async with httpx.AsyncClient() as client:
             for sentence in sentences:
+                url = f"{settings.MODERATION_API_ADDRESS}/sentences"
+                logger.info(f"Calling moderation service with url: {url}")
+                logger.info(f"Calling moderation service with sentence: {sentence}")
+
                 response = await client.post(
-                    f"{settings.MODERATION_API_ADDRESS}/sentences",
-                    json={"fragment": sentence},
+                    url, json={"fragment": sentence}, timeout=10.0
                 )
 
                 response.raise_for_status()
@@ -84,10 +90,12 @@ async def moderate_sentences(sentences: list[str]) -> bool:
                     return True
 
     except httpx.HTTPError as e:
+        logger.exception(f"Error while calling moderation service: {e}")
         raise ModerationServiceException(
             "Bad response from the moderation service."
         ) from e
     except KeyError as e:
+        logger.exception(f"Error while calling moderation service, bad format: {e}")
         raise ModerationServiceException(
             "Badly formatted body from the moderation service."
         ) from e
