@@ -13,6 +13,19 @@ def get_foul_words() -> list[str]:
     return settings.CSV_FOUL_WORDS.split(",")
 
 
+def _split_sentence(sentence: str) -> list[str]:
+    """This function splits a sentence into words.
+
+    Args:
+        sentence (str): The sentence to be split.
+
+    Returns:
+        list[str]: The words in the sentence.
+    """
+
+    return splitting_regex.findall(sentence)
+
+
 def has_foul_language(sentence: str) -> bool:
     """This function checks if a sentence contains foul words.
 
@@ -23,5 +36,5 @@ def has_foul_language(sentence: str) -> bool:
         bool: True if the sentence is safe, False otherwise.
     """
 
-    words = splitting_regex.findall(sentence)
+    words = _split_sentence(sentence)
     return any(word in get_foul_words() for word in words)
